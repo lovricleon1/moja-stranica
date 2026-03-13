@@ -73,3 +73,95 @@ input, select { background: var(--card); border: 1px solid var(--border); color:
 /* UTILS */
 .toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 15px 40px; border-radius: 12px; font-weight: 700; transition: 0.5s; z-index: 9999; }
 .toast.show { bottom: 40px; }
+/* TVOJ POSTOJEĆI KOD OSTAVITI DO KRAJA, SAMO DODAJ OVO NA DNO */
+
+/* --- MOBILE RESPONSIVENESS --- */
+
+@media (max-width: 1024px) {
+    .app-container {
+        grid-template-columns: 1fr; /* Sve ide jedno ispod drugog */
+        height: auto;
+        overflow-y: visible;
+    }
+
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    .nav-list {
+        display: flex;
+        overflow-x: auto; /* Navigacija se skrola lijevo-desno */
+        gap: 10px;
+        margin-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .nav-item {
+        white-space: nowrap;
+        margin-bottom: 0;
+    }
+
+    .nav-item.active {
+        border-left: none;
+        border-bottom: 4px solid var(--accent);
+        border-radius: 0;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .right-panel {
+        border-left: none;
+        border-top: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr; /* Statistika jedna ispod druge */
+    }
+
+    .action-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .zone-tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .input-row {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    input, select, .btn-primary {
+        width: 100%;
+    }
+
+    .table-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Fix za sat na manjim ekranima */
+@media (max-width: 480px) {
+    .clock-display h1 {
+        font-size: 2.2rem;
+    }
+    
+    .brand {
+        margin-bottom: 20px;
+    }
+}
