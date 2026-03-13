@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESERVLY | Enterprise OS</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">RESERVLY<span>.</span></div>
+            
+            <div class="clock-display">
+                <h1 id="time">00:00</h1>
+                <p id="date">Petak, 13. ožujka</p>
+            </div>
+
+            <nav class="nav-list">
+                <div class="nav-item active" onclick="showSection('main-view', this)">🏠 Kontrolna Ploča</div>
+                <div class="nav-item" onclick="showSection('analytics-view', this)">📈 Analitika Poslovanja</div>
+                <div class="nav-item" onclick="showSection('inventory-view', this)">🪑 Upravljanje Inventarom</div>
+                <div class="nav-item" onclick="showSection('settings-view', this)">⚙️ Postavke Sustava</div>
+            </nav>
+
+            <div class="sidebar-card">
+                <h4>Status Servera</h4>
+                <div class="status-indicator"><span></span> Online</div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <div id="main-view" class="content-page active">
+                <header class="section-header">
+                    <div>
+                        <h1>Tlocrt Restorana</h1>
+                        <p>Upravljajte stolovima i rezervacijama u realnom vremenu.</p>
+                    </div>
+                    <div class="header-widgets">
+                        <div class="widget">Slobodno: <strong id="free-stat">0</strong></div>
+                        <div class="widget">Zauzeto: <strong id="taken-stat">0</strong></div>
+                    </div>
+                </header>
+
+                <div class="action-bar">
+                    <div class="zone-tabs">
+                        <button class="tab active" onclick="switchZone('Main', this)">Glavna Sala</button>
+                        <button class="tab" onclick="switchZone('Terrace', this)">Terasa</button>
+                        <button class="tab" onclick="switchZone('VIP', this)">VIP Salon</button>
+                    </div>
+                    <div class="input-row">
+                        <input type="text" id="guest-name" placeholder="Ime gosta...">
+                        <select id="seat-filter" onchange="renderGrid()">
+                            <option value="0">Svi stolovi</option>
+                            <option value="2">2+ osobe</option>
+                            <option value="4">4+ osobe</option>
+                            <option value="6">6+ osobe</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="grid" class="table-grid"></div>
+            </div>
+
+            <div id="analytics-view" class="content-page">
+                <h1>Analitika Poslovanja</h1>
+                <div class="stats-container">
+                    <div class="stat-card"><h3>Popunjenost</h3><p>84%</p><span>+12% vs jučer</span></div>
+                    <div class="stat-card"><h3>Promet</h3><p>2,840 €</p><span>Real-time procjena</span></div>
+                    <div class="stat-card"><h3>Gosti</h3><p>156</p><span>Ukupno danas</span></div>
+                </div>
+                <div class="chart-placeholder">
+                    <p>Ovdje bi se nalazio grafikon rezervacija po satima (npr. Chart.js integracija)</p>
+                </div>
+            </div>
+
+            <div id="inventory-view" class="content-page">
+                <h1>Upravljanje Inventarom</h1>
+                <div class="add-table-form">
+                    <h3>Dodaj Novi Stol</h3>
+                    <div class="input-row">
+                        <input type="number" id="new-id" placeholder="Broj stola">
+                        <input type="number" id="new-seats" placeholder="Broj mjesta">
+                        <button class="btn-primary" onclick="addNewTable()">Dodaj u sustav</button>
+                    </div>
+                </div>
+                <div class="inventory-list">
+                    <h3>Trenutni Stolovi u zoni <span id="current-zone-name">Glavna Sala</span></h3>
+                    <div id="inventory-grid" class="inv-grid"></div>
+                </div>
+            </div>
+
+            <div id="settings-view" class="content-page">
+                <h1>Postavke Sustava</h1>
+                <div class="settings-group">
+                    <div class="setting-row">
+                        <div><strong>Automatsko oslobađanje</strong><p>Oslobodi stol nakon 2h</p></div>
+                        <input type="checkbox" checked>
+                    </div>
+                    <div class="setting-row">
+                        <div><strong>Zvučne obavijesti</strong><p>Ding zvuk pri novoj rezervaciji</p></div>
+                        <input type="checkbox">
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <aside class="right-panel">
+            <h3>DNEVNIK RADA</h3>
+            <div id="log-container" class="log-stream"></div>
+        </aside>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
