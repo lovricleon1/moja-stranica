@@ -19,10 +19,19 @@ let currentZone = 'Main';
 
 // NAVIGATION
 function showSection(id, el) {
+    // Sakrij sve stranice
     document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+    // Prikaži odabranu
     document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    
+    // Makni 'active' klasu sa svih navigacijskih stavki (i desktop i mobile)
+    document.querySelectorAll('.nav-item, .nav-item-m').forEach(i => i.classList.remove('active'));
+    
+    // Dodaj 'active' onome što je kliknuto
     el.classList.add('active');
+    
+    // Na mobitelu skrolaj na vrh kad se promijeni tab
+    window.scrollTo(0, 0);
 }
 
 // SWITCH ZONE
