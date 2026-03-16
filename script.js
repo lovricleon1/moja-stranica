@@ -1,64 +1,119 @@
-// DATABASE
+// ==========================================
+// 1. BAZA PODATAKA (Povećan broj stolova)
+// ==========================================
 const data = {
     'Main': [
-        { id: 1, seats: 4, taken: true, guest: "Ivan H." },
+        { id: 1, seats: 4, taken: true, guest: "Vladimir Š." },
         { id: 2, seats: 2, taken: false },
         { id: 3, seats: 4, taken: false },
-        { id: 4, seats: 6, taken: true, guest: "Ana M." }
+        { id: 4, seats: 6, taken: true, guest: "Marko M." },
+        { id: 5, seats: 2, taken: false },
+        { id: 6, seats: 4, taken: false },
+        { id: 7, seats: 2, taken: false },
+        { id: 8, seats: 8, taken: true, guest: "Goran L." },
+        { id: 9, seats: 4, taken: true, guest: "Hrvoje L." },
+        { id: 10, seats: 2, taken: false }
     ],
     'Terrace': [
-        { id: 10, seats: 2, taken: false },
-        { id: 11, seats: 4, taken: false }
+        { id: 11, seats: 2, taken: false },
+        { id: 12, seats: 4, taken: true, guest: "Nataša Ć." },
+        { id: 13, seats: 2, taken: false },
+        { id: 14, seats: 4, taken: false },
+        { id: 15, seats: 6, taken: true, guest: "Dijana E." }
     ],
     'VIP': [
-        { id: 101, seats: 12, taken: true, guest: "VIP Grupa" }
+        { id: 101, seats: 12, taken: true, guest: "Širaz N." },
+        { id: 102, seats: 6, taken: false }
     ]
 };
 
 let currentZone = 'Main';
+let currentUserRole = null; // 'admin' ili 'gost'
 
-// NAVIGATION
-function showSection(id, el) {
-    // Sakrij sve stranice
-    document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
-    // Prikaži odabranu
-    document.getElementById(id).classList.add('active');
-    
-    // Makni 'active' klasu sa svih navigacijskih stavki (i desktop i mobile)
-    document.querySelectorAll('.nav-item, .nav-item-m').forEach(i => i.classList.remove('active'));
-    
-    // Dodaj 'active' onome što je kliknuto
-    el.classList.add('active');
-    
-    // Na mobitelu skrolaj na vrh kad se promijeni tab
-    window.scrollTo(0, 0);
+// ==========================================
+// 2. LOGIN LOGIKA
+// ==========================================
+function handleLogin() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+
+    if (user === 'admin' && pass === 'sdjb1') {
+        loginAs('admin');
+    } else if (user === 'gost' && pass === '12345') {
+        loginAs('gost');
+    } else {
+       showToast("❌ Pogrešni podaci!");
+    }
 }
 
-// SWITCH ZONE
+function loginAs(role) {
+    currentUserRole = role;
+    // Mjenjamo klase na body-u da CSS odradi skrivanje elemenata
+    document.body.classList.remove('logged-out');
+    document.body.classList.add('logged-in');
+    document.body.classList.add('user-' + role);
+    
+    document.getElementById('role-display').innerText = role === 'admin' ? "👑 ADMIN MODE" : "👤 GOST MODE";
+    
+    showToast(`Dobrodošli, ${role}!`);
+    renderGrid();
+}
+
+function logout() {
+    location.reload(); // Resetira aplikaciju na početni login
+}
+
+// ==========================================
+// 3. NAVIGACIJA I SEKCIJE
+// ==========================================
+function showSection(id, el) {
+    // Sigurnosna provjera: Gost ne može u admin sekcije
+    if (currentUserRole === 'gost' && (id === 'analytics-view' || id === 'inventory-view' || id === 'settings-view')) {
+        showToast("🚫 Nemate ovlasti za ovu sekciju!");
+        return;
+    }
+
+    // Sakrij sve stranice
+    document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
+    // Prikaži kliknutu
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+    
+    // Update navigacijskih gumba
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Ako se otvori inventar, osvježi listu
+    if(id === 'inventory-view') renderInventory();
+}
+
 function switchZone(zone, el) {
     currentZone = zone;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('current-zone-name').innerText = zone;
+    
+    const targetSpan = document.getElementById('target-zone-name');
+    if(targetSpan) targetSpan.innerText = zone === 'Main' ? 'Glavna Sala' : zone;
+    
     renderGrid();
+    renderInventory();
 }
 
-// RENDER GRID
+// ==========================================
+// 4. UPRAVLJANJE STOLOVIMA (RENDER)
+// ==========================================
 function renderGrid() {
     const grid = document.getElementById('grid');
-    const invGrid = document.getElementById('inventory-grid');
-    const filter = parseInt(document.getElementById('seat-filter').value);
+    if(!grid) return;
     
+    const filter = parseInt(document.getElementById('seat-filter').value);
     grid.innerHTML = '';
-    invGrid.innerHTML = '';
-
     let free = 0, taken = 0;
 
     data[currentZone].forEach(t => {
         if (t.seats < filter) return;
         t.taken ? taken++ : free++;
 
-        // Render for Tlocrt
         const node = document.createElement('div');
         node.className = `table-node ${t.taken ? 'taken' : ''}`;
         node.innerHTML = `
@@ -68,13 +123,6 @@ function renderGrid() {
         `;
         if (!t.taken) node.onclick = () => reserve(t.id);
         grid.appendChild(node);
-
-        // Render for Inventory
-        const invNode = document.createElement('div');
-        invNode.style.padding = "10px";
-        invNode.style.borderBottom = "1px solid #262626";
-        invNode.innerHTML = `Stol ${t.id} - ${t.seats} mjesta <button onclick="deleteTable(${t.id})" style="float:right; color:red; background:none; border:none; cursor:pointer">Ukloni</button>`;
-        invGrid.appendChild(invNode);
     });
 
     document.getElementById('free-stat').innerText = free;
@@ -82,47 +130,88 @@ function renderGrid() {
     updateLog();
 }
 
-// RESERVE
+function renderInventory() {
+    const invGrid = document.getElementById('inventory-grid');
+    if(!invGrid) return;
+    invGrid.innerHTML = '';
+
+    data[currentZone].forEach(t => {
+        const item = document.createElement('div');
+        item.style.cssText = "display:flex; justify-content:space-between; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:10px; align-items:center;";
+        
+        // Samo admin vidi gumb za brisanje
+        const deleteBtn = currentUserRole === 'admin' 
+            ? `<button onclick="deleteTable(${t.id})" style="color:#ef4444; background:none; border:none; cursor:pointer; font-weight:600">UKLONI</button>` 
+            : '';
+
+        item.innerHTML = `<span><strong>Stol ${t.id}</strong> — ${t.seats} mjesta</span> ${deleteBtn}`;
+        invGrid.appendChild(item);
+    });
+}
+
+// ==========================================
+// 5. RADNJE (RESERVACIJA, DODAVANJE, BRISANJE)
+// ==========================================
 function reserve(id) {
     const name = document.getElementById('guest-name').value;
-    if (!name) { showToast("⚠️ Unesite ime gosta!"); return; }
-
+    if (!name) { 
+        showToast("⚠️ Unesite ime gosta prije klika na stol!"); 
+        return; 
+    }
+    
     const table = data[currentZone].find(t => t.id === id);
     table.taken = true;
     table.guest = name;
     
-    showToast(`✅ Rezervirano: Stol ${id}`);
+    showToast(`Stol ${id} rezerviran za: ${name}`);
     document.getElementById('guest-name').value = '';
     renderGrid();
 }
 
-// ADD TABLE
 function addNewTable() {
-    const id = document.getElementById('new-id').value;
-    const seats = document.getElementById('new-seats').value;
-    
-    if (!id || !seats) return;
+    if(currentUserRole !== 'admin') {
+        showToast("🚫 Samo administrator može dodavati stolove!");
+        return;
+    }
 
-    data[currentZone].push({ id: parseInt(id), seats: parseInt(seats), taken: false });
+    const idInput = document.getElementById('new-id');
+    const seatInput = document.getElementById('new-seats');
+    
+    if (!idInput.value || !seatInput.value) return;
+
+    data[currentZone].push({ 
+        id: parseInt(idInput.value), 
+        seats: parseInt(seatInput.value), 
+        taken: false 
+    });
+    
+    idInput.value = '';
+    seatInput.value = '';
+    showToast("✨ Stol uspješno dodan u bazu!");
+    renderInventory();
     renderGrid();
-    showToast("✨ Novi stol dodan!");
 }
 
 function deleteTable(id) {
+    if(currentUserRole !== 'admin') return;
     data[currentZone] = data[currentZone].filter(t => t.id !== id);
+    renderInventory();
     renderGrid();
 }
 
-// LOG
+// ==========================================
+// 6. POMOĆNE FUNKCIJE (SAT, TOAST, LOG)
+// ==========================================
 function updateLog() {
     const container = document.getElementById('log-container');
+    if(!container) return;
     container.innerHTML = '';
     Object.keys(data).forEach(zone => {
         data[zone].forEach(t => {
             if (t.taken) {
                 const item = document.createElement('div');
-                item.className = 'log-item';
-                item.innerHTML = `<strong>${t.guest}</strong><br><small>${zone} • Stol ${t.id}</small>`;
+                item.style.cssText = "padding:12px; background:#1e1e26; border-radius:8px; margin-bottom:8px; border-left:3px solid var(--accent); font-size:0.8rem;";
+                item.innerHTML = `<strong>${t.guest}</strong><br><span style="color:var(--text-dim)">${zone} • Stol ${t.id}</span>`;
                 container.appendChild(item);
             }
         });
@@ -136,10 +225,12 @@ function showToast(msg) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// CLOCK
 setInterval(() => {
     const now = new Date();
-    document.getElementById('time').innerText = now.toLocaleTimeString('hr-HR', {hour: '2-digit', minute:'2-digit'});
+    const timeStr = now.toLocaleTimeString('hr-HR', {hour: '2-digit', minute:'2-digit'});
+    const timeEl = document.getElementById('time');
+    if(timeEl) timeEl.innerText = timeStr;
 }, 1000);
 
+// Inicijalno pokretanje
 renderGrid();
