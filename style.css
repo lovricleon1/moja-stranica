@@ -1,140 +1,158 @@
 :root {
     --bg: #050507;
-    --sidebar: #0f0f13;
+    --nav: #0f0f13;
     --card: #16161e;
     --accent: #3b82f6;
     --text: #f1f5f9;
     --text-dim: #94a3b8;
     --border: #262626;
+    --success: #10b981;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+body { background: var(--bg); color: var(--text); line-height: 1.5; }
 
-/* OSNOVNI LAYOUT (Desktop) */
-.app-container { 
-    display: grid; 
-    grid-template-columns: 280px 1fr 320px; 
-    height: 100vh; 
+/* NAV BAR */
+.top-nav {
+    height: 70px;
+    background: var(--nav);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
-
-/* SIDEBAR */
-.sidebar { background: var(--sidebar); border-right: 1px solid var(--border); padding: 40px 25px; display: flex; flex-direction: column; z-index: 100; }
-.brand { font-weight: 800; font-size: 1.5rem; color: var(--accent); margin-bottom: 50px; }
+.nav-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+.brand { font-weight: 800; font-size: 1.4rem; color: var(--accent); margin-right: 40px; }
 .brand span { color: white; }
-.clock-display h1 { font-size: 3rem; font-weight: 200; }
-.clock-display p { color: var(--text-dim); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
 
-.nav-list { margin-top: 50px; flex-grow: 1; }
-.nav-item { padding: 14px; border-radius: 12px; cursor: pointer; color: var(--text-dim); transition: 0.3s; margin-bottom: 5px; font-weight: 500; }
-.nav-item:hover, .nav-item.active { background: #1e1e26; color: white; }
-.nav-item.active { border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; }
+.nav-links { display: flex; gap: 8px; flex-grow: 1; }
+.nav-item {
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+.nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+.nav-item.active { background: #1e1e26; color: var(--accent); }
 
-.sidebar-card { background: #1a1a24; padding: 15px; border-radius: 15px; margin-top: auto; }
-.status-indicator span { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 5px; }
+.nav-clock { font-family: 'Inter'; font-weight: 600; color: var(--text-dim); }
 
-/* MAIN CONTENT */
-.main-content { padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
+/* MAIN LAYOUT */
+.app-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    min-height: calc(100vh - 70px);
+}
+.main-content { padding: 40px; }
+.right-panel { background: var(--nav); border-left: 1px solid var(--border); padding: 30px; }
+
+/* PAGES */
 .content-page { display: none; }
-.content-page.active { display: block; animation: slideUp 0.4s ease; }
+.content-page.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* GRID & CARDS */
+.table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+.table-node { 
+    background: var(--card); border: 1px solid var(--border); padding: 35px 20px; 
+    border-radius: 20px; text-align: center; transition: 0.2s; cursor: pointer;
+}
+.table-node:hover { border-color: var(--accent); background: #1c1c26; }
+.table-node.taken { border-color: #ef4444; opacity: 0.7; }
 
-/* TLOCRT & GRID */
-.section-header { display: flex; justify-content: space-between; margin-bottom: 40px; align-items: center; }
-.header-widgets { display: flex; gap: 15px; }
-.widget { background: var(--card); padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); font-size: 0.9rem; }
+/* ANALYTICS & STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
+.stat-card { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--border); }
+.stat-val { font-size: 2rem; font-weight: 700; margin: 10px 0; }
+.trend { font-size: 0.8rem; color: var(--text-dim); }
+.trend.positive { color: var(--success); }
+.placeholder-chart { height: 300px; background: #0f0f13; border: 1px dashed var(--border); border-radius: 15px; margin-top: 20px; display: flex; align-items: center; justify-content: center; color: var(--text-dim); }
 
-.action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 20px; }
-.zone-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
-.tab { background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 18px; border-radius: 30px; cursor: pointer; white-space: nowrap; }
+/* SETTINGS */
+.settings-container { background: var(--card); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; margin-top: 30px; }
+.setting-item { padding: 20px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.setting-info p { font-size: 0.85rem; color: var(--text-dim); }
+
+/* UTILS */
+.action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; }
+.tab { padding: 10px 20px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 30px; cursor: pointer; margin-right: 8px; }
 .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-.input-row { display: flex; gap: 10px; }
-input, select { background: var(--card); border: 1px solid var(--border); color: white; padding: 12px 15px; border-radius: 10px; outline: none; }
-
-.table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-.table-node { background: var(--card); border: 1px solid var(--border); padding: 30px 15px; border-radius: 20px; text-align: center; transition: 0.3s; cursor: pointer; }
-.table-node:hover { border-color: var(--accent); transform: scale(1.02); }
-.table-node.taken { opacity: 0.6; border-color: #ef4444; }
-
-/* RIGHT PANEL (Dnevnik) */
-.right-panel { background: var(--sidebar); border-left: 1px solid var(--border); padding: 30px; overflow-y: auto; }
-.log-item { padding: 12px; border-radius: 10px; background: #16161e; margin-bottom: 10px; border-left: 4px solid var(--accent); font-size: 0.85rem; }
+.btn-primary { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+input, select { background: var(--card); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; }
 
 /* TOAST */
-.toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 12px 30px; border-radius: 50px; font-weight: 700; transition: 0.5s; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: white; color: black; padding: 14px 40px; border-radius: 50px; font-weight: 700; transition: 0.4s; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .toast.show { bottom: 40px; }
 
-/* --- RESPONSIVE ADAPTATIONS (Mobitel i Tablet) --- */
-
-@media (max-width: 1100px) {
-    .app-container { grid-template-columns: 240px 1fr; } /* Sakriva desni panel na tabletima */
-    .right-panel { display: none; }
-}
-
+/* MOBILE */
+@media (max-width: 1100px) { .app-wrapper { grid-template-columns: 1fr; } .right-panel { display: none; } }
 @media (max-width: 768px) {
-    .app-container { 
-        grid-template-columns: 1fr; 
-        height: auto; 
-        display: block; 
-    }
-
-    /* Sidebar pretvaramo u fiksni Top Bar */
-    .sidebar {
-        position: sticky;
-        top: 0;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 20px;
-        height: 70px;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .brand { margin-bottom: 0; font-size: 1.2rem; }
-    .clock-display, .sidebar-card, .nav-list { display: none; } /* Sakrivamo staru navigaciju */
-
-    /* Donja navigacija za mobitel */
-    .mobile-nav {
-        display: flex !important;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: var(--sidebar);
-        border-top: 1px solid var(--border);
-        justify-content: space-around;
-        padding: 10px 0;
-        z-index: 1000;
-    }
-
-    .nav-item-m {
-        color: var(--text-dim);
-        font-size: 1.2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-decoration: none;
-    }
-    .nav-item-m span { font-size: 0.65rem; margin-top: 4px; font-weight: 600; }
-    .nav-item-m.active { color: var(--accent); }
-
+    .nav-links { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav); border-top: 1px solid var(--border); padding: 10px; justify-content: space-around; margin: 0; }
+    .nav-item { font-size: 0.7rem; padding: 5px; text-align: center; flex: 1; }
     .main-content { padding: 20px; padding-bottom: 100px; }
-    
-    .section-header { flex-direction: column; align-items: flex-start; gap: 15px; }
-    .header-widgets { width: 100%; justify-content: space-between; }
-    .widget { flex: 1; text-align: center; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column; align-items: stretch; gap: 15px; }
+}
+/* SVI PRETHODNI STILOVI OSTAJU ISTI, SAMO DODAJ OVO NA KRAJ */
 
-    .action-bar { flex-direction: column; align-items: stretch; }
-    .input-row { flex-direction: column; }
-    input, select { width: 100%; font-size: 16px; }
-
-    .table-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .table-node { padding: 20px 10px; border-radius: 15px; }
-    .table-node h2 { font-size: 0.9rem; }
+/* LOGIN OVERLAY */
+.login-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
 
-/* Skrivanje mobilne nav na desktopu */
-.mobile-nav { display: none; }
+.login-card {
+    background: var(--card);
+    padding: 40px;
+    border-radius: 25px;
+    border: 1px solid var(--border);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+/* PERMISSIONS LOGIC */
+/* Ako je korisnik gost, sakrij sve s klasom admin-only */
+body.user-guest .admin-only {
+    display: none !important;
+}
+
+/* Sakrij cijelu aplikaciju dok se ne ulogiraš */
+body.logged-out .top-nav, 
+body.logged-out .app-wrapper {
+    display: none;
+}
+
+body.logged-in #login-screen {
+    display: none;
+}
+
+/* SWITCH TOGGLE (Za postavke) */
+.switch { position: relative; display: inline-block; width: 45px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(21px); }
