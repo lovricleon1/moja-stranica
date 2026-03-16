@@ -7,36 +7,45 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
-    <div class="app-container">
-        <aside class="sidebar">
+<body class="logged-out"> <div id="login-screen" class="login-overlay">
+        <div class="login-card">
             <div class="brand">REZERVATOR<span>.</span></div>
-            
-            <div class="clock-display">
-                <h1 id="time">00:00</h1>
-                <p id="date">Subota 14.ožujka</p>
+            <h2>Prijava u sustav</h2>
+            <div class="login-inputs">
+                <input type="text" id="username" placeholder="Korisničko ime">
+                <input type="password" id="password" placeholder="Lozinka">
+                <button class="btn-primary" onclick="handleLogin()">Prijavi se</button>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: var(--text-dim);">
+                    Prijavi se kao: gost / 12345
+                </p>
             </div>
+        </div>
+    </div>
 
-            <nav class="nav-list">
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="brand">REZERVATOR<span>.</span></div>
+            <div class="nav-links">
                 <div class="nav-item active" onclick="showSection('main-view', this)">🏠 Kontrolna Ploča</div>
-                <div class="nav-item" onclick="showSection('analytics-view', this)">📈 Analitika Poslovanja</div>
-                <div class="nav-item" onclick="showSection('inventory-view', this)">🪑 Upravljanje Inventarom</div>
-                <div class="nav-item" onclick="showSection('settings-view', this)">⚙️ Postavke Sustava</div>
-            </nav>
-
-            <div class="sidebar-card">
-                <h4>Status Servera</h4>
-                <div class="status-indicator"><span></span> Online</div>
+                <div class="nav-item admin-only" onclick="showSection('analytics-view', this)">📈 Analitika</div>
+                <div class="nav-item admin-only" onclick="showSection('inventory-view', this)">🪑 Inventar</div>
+                <div class="nav-item admin-only" onclick="showSection('settings-view', this)">⚙️ Postavke</div>
             </div>
-        </aside>
+            <div class="nav-clock">
+                <span id="role-display" style="margin-right: 15px; color: var(--accent); font-size: 0.8rem;"></span>
+                <span id="time">00:00</span>
+                <button onclick="logout()" style="margin-left:15px; background:none; border:none; color:#ef4444; cursor:pointer;">Izlaz</button>
+            </div>
+        </div>
+    </nav>
 
+    <div class="app-wrapper">
         <main class="main-content">
-            
             <div id="main-view" class="content-page active">
                 <header class="section-header">
                     <div>
                         <h1>Tlocrt Restorana</h1>
-                        <p>Upravljajte stolovima i rezervacijama u realnom vremenu.</p>
+                        <p>Upravljanje stolovima u trenutnom vremenu.</p>
                     </div>
                     <div class="header-widgets">
                         <div class="widget">Slobodno: <strong id="free-stat">0</strong></div>
@@ -60,52 +69,39 @@
                         </select>
                     </div>
                 </div>
-
                 <div id="grid" class="table-grid"></div>
             </div>
 
-            <div id="analytics-view" class="content-page">
+            <div id="analytics-view" class="content-page admin-only">
                 <h1>Analitika Poslovanja</h1>
-                <div class="stats-container">
-                    <div class="stat-card"><h3>Popunjenost</h3><p>84%</p><span>+12% vs jučer</span></div>
-                    <div class="stat-card"><h3>Promet</h3><p>2,840 €</p><span>Real-time procjena</span></div>
-                    <div class="stat-card"><h3>Gosti</h3><p>156</p><span>Ukupno danas</span></div>
-                </div>
-                <div class="chart-placeholder">
-                    <p>Ovdje bi se nalazio grafikon rezervacija po satima (npr. Chart.js integracija)</p>
+                <div class="stats-grid">
+                    <div class="stat-card"><h3>Dnevna Popunjenost</h3><p class="stat-val">84%</p></div>
+                    <div class="stat-card"><h3>Procjena Prometa</h3><p class="stat-val">2.840 €</p></div>
                 </div>
             </div>
 
-            <div id="inventory-view" class="content-page">
+            <div id="inventory-view" class="content-page admin-only">
                 <h1>Upravljanje Inventarom</h1>
-                <div class="add-table-form">
-                    <h3>Dodaj Novi Stol</h3>
-                    <div class="input-row">
+                <div class="inventory-card">
+                    <h3>Dodaj Novi Stol: <span id="target-zone-name" style="color:var(--accent)">Glavna Sala</span></h3>
+                    <div class="input-row" style="margin-top:15px">
                         <input type="number" id="new-id" placeholder="Broj stola">
                         <input type="number" id="new-seats" placeholder="Broj mjesta">
-                        <button class="btn-primary" onclick="addNewTable()">Dodaj u sustav</button>
+                        <button class="btn-primary" onclick="addNewTable()">Dodaj</button>
                     </div>
                 </div>
-                <div class="inventory-list">
-                    <h3>Trenutni Stolovi u zoni <span id="current-zone-name">Glavna Sala</span></h3>
-                    <div id="inventory-grid" class="inv-grid"></div>
-                </div>
+                <div id="inventory-grid" class="inv-list" style="margin-top:20px"></div>
             </div>
 
-            <div id="settings-view" class="content-page">
+            <div id="settings-view" class="content-page admin-only">
                 <h1>Postavke Sustava</h1>
-                <div class="settings-group">
-                    <div class="setting-row">
-                        <div><strong>Automatsko oslobađanje</strong><p>Oslobodi stol nakon 2h</p></div>
-                        <input type="checkbox" checked>
-                    </div>
-                    <div class="setting-row">
-                        <div><strong>Zvučne obavijesti</strong><p>Ding zvuk pri novoj rezervaciji</p></div>
-                        <input type="checkbox">
+                <div class="settings-container">
+                    <div class="setting-item">
+                        <strong>Automatsko oslobađanje</strong>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
                     </div>
                 </div>
             </div>
-
         </main>
 
         <aside class="right-panel">
@@ -115,13 +111,6 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    <div class="mobile-nav">
-    <div class="nav-item-m active" onclick="showSection('main-view', this)">🏠<span>Home</span></div>
-    <div class="nav-item-m" onclick="showSection('analytics-view', this)">📈<span>Stats</span></div>
-    <div class="nav-item-m" onclick="showSection('inventory-view', this)">🪑<span>Stolovi</span></div>
-    <div class="nav-item-m" onclick="showSection('settings-view', this)">⚙️<span>Menu</span></div>
-</div>
-
     <script src="script.js"></script>
 </body>
 </html>
