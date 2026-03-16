@@ -62,7 +62,7 @@ function loginAs(role) {
         document.body.classList.add('logged-in');
         document.body.classList.add('user-' + role);
         
-        document.getElementById('role-display').innerText = role === 'admin' ? "👑 ADMIN MODE" : "👤 GOST MODE";
+        document.getElementById('role-display').innerText = role === 'admin' ? "👑 ADMIN " : "👤 GOST ";
         
         renderGrid();
         showToast(`Dobrodošli, ${role}!`);
