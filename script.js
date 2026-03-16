@@ -48,15 +48,25 @@ function handleLogin() {
 
 function loginAs(role) {
     currentUserRole = role;
-    // Mjenjamo klase na body-u da CSS odradi skrivanje elemenata
-    document.body.classList.remove('logged-out');
-    document.body.classList.add('logged-in');
-    document.body.classList.add('user-' + role);
-    
-    document.getElementById('role-display').innerText = role === 'admin' ? "👑 ADMIN MODE" : "👤 GOST MODE";
-    
-    showToast(`Dobrodošli, ${role}!`);
-    renderGrid();
+    const loginScreen = document.getElementById('login-screen');
+
+    // Animacija nestajanja
+    loginScreen.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+    loginScreen.style.opacity = "0";
+    loginScreen.style.transform = "scale(0.95)";
+    loginScreen.style.pointerEvents = "none"; // DODAJ OVO: dopušta klikove kroz prozirni sloj
+
+    setTimeout(() => {
+        loginScreen.style.display = 'none'; // Ovo ga potpuno uklanja iz DOM-a
+        document.body.classList.remove('logged-out');
+        document.body.classList.add('logged-in');
+        document.body.classList.add('user-' + role);
+        
+        document.getElementById('role-display').innerText = role === 'admin' ? "👑 ADMIN MODE" : "👤 GOST MODE";
+        
+        renderGrid();
+        showToast(`Dobrodošli, ${role}!`);
+    }, 400);
 }
 
 function logout() {
