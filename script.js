@@ -1,6 +1,3 @@
-// ==========================================
-// 1. BAZA PODATAKA (Povećan broj stolova)
-// ==========================================
 const data = {
     'Main': [
         { id: 1, seats: 4, taken: true, guest: "Vladimir Š." },
@@ -28,21 +25,21 @@ const data = {
 };
 
 let currentZone = 'Main';
-let currentUserRole = null; // 'admin' ili 'gost'
+let currentUserRole = null;
 
-// ==========================================
-// 2. LOGIN LOGIKA
-// ==========================================
 function handleLogin() {
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
+    const card = document.querySelector('.login-card');
 
     if (user === 'admin' && pass === 'sdjb1') {
         loginAs('admin');
     } else if (user === 'gost' && pass === '12345') {
         loginAs('gost');
     } else {
-       showToast("❌ Pogrešni podaci!");
+       showToast("❌ Pogrešni podaci za prijavu!");
+       card.classList.add('shake');
+       setTimeout(() => card.classList.remove('shake'), 300);
     }
 }
 
@@ -50,14 +47,13 @@ function loginAs(role) {
     currentUserRole = role;
     const loginScreen = document.getElementById('login-screen');
 
-    // Animacija nestajanja
     loginScreen.style.transition = "opacity 0.4s ease, transform 0.4s ease";
     loginScreen.style.opacity = "0";
     loginScreen.style.transform = "scale(0.95)";
-    loginScreen.style.pointerEvents = "none"; // DODAJ OVO: dopušta klikove kroz prozirni sloj
+    loginScreen.style.pointerEvents = "none";
 
     setTimeout(() => {
-        loginScreen.style.display = 'none'; // Ovo ga potpuno uklanja iz DOM-a
+        loginScreen.style.display = 'none';
         document.body.classList.remove('logged-out');
         document.body.classList.add('logged-in');
         document.body.classList.add('user-' + role);
@@ -70,30 +66,19 @@ function loginAs(role) {
 }
 
 function logout() {
-    location.reload(); // Resetira aplikaciju na početni login
+    location.reload();
 }
 
-// ==========================================
-// 3. NAVIGACIJA I SEKCIJE
-// ==========================================
 function showSection(id, el) {
-    // Sigurnosna provjera: Gost ne može u admin sekcije
     if (currentUserRole === 'gost' && (id === 'analytics-view' || id === 'inventory-view' || id === 'settings-view')) {
         showToast("🚫 Nemate ovlasti za ovu sekciju!");
         return;
     }
-
-    // Sakrij sve stranice
     document.querySelectorAll('.content-page').forEach(p => p.classList.remove('active'));
-    // Prikaži kliknutu
     const target = document.getElementById(id);
     if(target) target.classList.add('active');
-    
-    // Update navigacijskih gumba
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
     el.classList.add('active');
-    
-    // Ako se otvori inventar, osvježi listu
     if(id === 'inventory-view') renderInventory();
 }
 
@@ -101,40 +86,27 @@ function switchZone(zone, el) {
     currentZone = zone;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    
     const targetSpan = document.getElementById('target-zone-name');
     if(targetSpan) targetSpan.innerText = zone === 'Main' ? 'Glavna Sala' : zone;
-    
     renderGrid();
     renderInventory();
 }
 
-// ==========================================
-// 4. UPRAVLJANJE STOLOVIMA (RENDER)
-// ==========================================
 function renderGrid() {
     const grid = document.getElementById('grid');
     if(!grid) return;
-    
     const filter = parseInt(document.getElementById('seat-filter').value);
     grid.innerHTML = '';
     let free = 0, taken = 0;
-
     data[currentZone].forEach(t => {
         if (t.seats < filter) return;
         t.taken ? taken++ : free++;
-
         const node = document.createElement('div');
         node.className = `table-node ${t.taken ? 'taken' : ''}`;
-        node.innerHTML = `
-            <small>STOL ${t.id}</small>
-            <h2>${t.seats} MJESTA</h2>
-            <p>${t.taken ? '🔴 ' + t.guest : '🟢 Slobodno'}</p>
-        `;
+        node.innerHTML = `<small>STOL ${t.id}</small><h2>${t.seats} MJESTA</h2><p>${t.taken ? '🔴 ' + t.guest : '🟢 Slobodno'}</p>`;
         if (!t.taken) node.onclick = () => reserve(t.id);
         grid.appendChild(node);
     });
-
     document.getElementById('free-stat').innerText = free;
     document.getElementById('taken-stat').innerText = taken;
     updateLog();
@@ -144,60 +116,34 @@ function renderInventory() {
     const invGrid = document.getElementById('inventory-grid');
     if(!invGrid) return;
     invGrid.innerHTML = '';
-
     data[currentZone].forEach(t => {
         const item = document.createElement('div');
         item.style.cssText = "display:flex; justify-content:space-between; padding:15px; background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:10px; align-items:center;";
-        
-        // Samo admin vidi gumb za brisanje
-        const deleteBtn = currentUserRole === 'admin' 
-            ? `<button onclick="deleteTable(${t.id})" style="color:#ef4444; background:none; border:none; cursor:pointer; font-weight:600">UKLONI</button>` 
-            : '';
-
+        const deleteBtn = currentUserRole === 'admin' ? `<button onclick="deleteTable(${t.id})" style="color:#ef4444; background:none; border:none; cursor:pointer; font-weight:600">UKLONI</button>` : '';
         item.innerHTML = `<span><strong>Stol ${t.id}</strong> — ${t.seats} mjesta</span> ${deleteBtn}`;
         invGrid.appendChild(item);
     });
 }
 
-// ==========================================
-// 5. RADNJE (RESERVACIJA, DODAVANJE, BRISANJE)
-// ==========================================
 function reserve(id) {
     const name = document.getElementById('guest-name').value;
-    if (!name) { 
-        showToast("⚠️ Unesite ime gosta prije klika na stol!"); 
-        return; 
-    }
-    
+    if (!name) { showToast("⚠️ Unesite ime gosta!"); return; }
     const table = data[currentZone].find(t => t.id === id);
     table.taken = true;
     table.guest = name;
-    
-    showToast(`Stol ${id} rezerviran za: ${name}`);
+    showToast(`Stol ${id} rezerviran: ${name}`);
     document.getElementById('guest-name').value = '';
     renderGrid();
 }
 
 function addNewTable() {
-    if(currentUserRole !== 'admin') {
-        showToast("🚫 Samo administrator može dodavati stolove!");
-        return;
-    }
-
+    if(currentUserRole !== 'admin') return;
     const idInput = document.getElementById('new-id');
     const seatInput = document.getElementById('new-seats');
-    
     if (!idInput.value || !seatInput.value) return;
-
-    data[currentZone].push({ 
-        id: parseInt(idInput.value), 
-        seats: parseInt(seatInput.value), 
-        taken: false 
-    });
-    
-    idInput.value = '';
-    seatInput.value = '';
-    showToast("✨ Stol uspješno dodan u bazu!");
+    data[currentZone].push({ id: parseInt(idInput.value), seats: parseInt(seatInput.value), taken: false });
+    idInput.value = ''; seatInput.value = '';
+    showToast("✨ Stol dodan!");
     renderInventory();
     renderGrid();
 }
@@ -209,9 +155,6 @@ function deleteTable(id) {
     renderGrid();
 }
 
-// ==========================================
-// 6. POMOĆNE FUNKCIJE (SAT, TOAST, LOG)
-// ==========================================
 function updateLog() {
     const container = document.getElementById('log-container');
     if(!container) return;
@@ -242,5 +185,4 @@ setInterval(() => {
     if(timeEl) timeEl.innerText = timeStr;
 }, 1000);
 
-// Inicijalno pokretanje
 renderGrid();
