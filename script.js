@@ -186,3 +186,16 @@ setInterval(() => {
 }, 1000);
 
 renderGrid();
+
+function toggleFAQ(btn) {
+    const item = btn.parentElement;
+    const isActive = item.classList.contains('active');
+    
+    // Zatvori sve ostale
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+    
+    // Otvori kliknuti ako nije bio aktivan
+    if (!isActive) {
+        item.classList.add('active');
+    }
+}
